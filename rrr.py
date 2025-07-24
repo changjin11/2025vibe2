@@ -2,19 +2,21 @@ import streamlit as st
 import random
 
 # ----------------- 설정 -----------------
-st.set_page_config(page_title="가위바위보 대결!", layout="centered")
-st.title("✊ ✌️ ✋ 가위바위보 대결!")
-st.markdown("컴퓨터와 대결해보세요!")
+st.set_page_config(page_title="죽음을 건 가위바위보", layout="centered")
+st.title("💀 죽음을 건 가위바위보 대결")
+st.markdown("인간과 AI의 **5판 3선승제** 대결...\n지면 **죽음**이 기다립니다...")
 
-# ----------------- 세션 상태 초기화 -----------------
-if "user_score" not in st.session_state:
-    st.session_state.user_score = 0
-if "computer_score" not in st.session_state:
-    st.session_state.computer_score = 0
-if "draw_count" not in st.session_state:
-    st.session_state.draw_count = 0
-if "last_result" not in st.session_state:
-    st.session_state.last_result = ""
+# ----------------- 초기 상태 -----------------
+if "user_wins" not in st.session_state:
+    st.session_state.user_wins = 0
+if "computer_wins" not in st.session_state:
+    st.session_state.computer_wins = 0
+if "round" not in st.session_state:
+    st.session_state.round = 0
+if "game_over" not in st.session_state:
+    st.session_state.game_over = False
+if "battle_log" not in st.session_state:
+    st.session_state.battle_log = []
 
 # ----------------- 가위바위보 로직 -----------------
 choices = ["가위", "바위", "보"]
@@ -30,72 +32,69 @@ def get_result(user, computer):
     else:
         return "패배"
 
-# ----------------- 버튼 UI -----------------
-st.subheader("당신의 선택은?")
-col1, col2, col3 = st.columns(3)
+# ----------------- 게임 중 -----------------
+if not st.session_state.game_over:
 
-with col1:
-    if st.button("✌️ 가위"):
-        user_choice = "가위"
+    st.markdown(f"### ⚔️ Round {st.session_state.round + 1}")
+
+    col1, col2, col3 = st.columns(3)
+    user_choice = None
+
+    with col1:
+        if st.button("✌️ 가위"):
+            user_choice = "가위"
+    with col2:
+        if st.button("✊ 바위"):
+            user_choice = "바위"
+    with col3:
+        if st.button("✋ 보"):
+            user_choice = "보"
+
+    if user_choice:
         computer_choice = random.choice(choices)
         result = get_result(user_choice, computer_choice)
-        st.session_state.last_result = (user_choice, computer_choice, result)
+        st.session_state.round += 1
+
+        # 결과 반영
         if result == "승리":
-            st.session_state.user_score += 1
+            st.session_state.user_wins += 1
+            outcome = "🎉 당신의 승리!"
         elif result == "패배":
-            st.session_state.computer_score += 1
+            st.session_state.computer_wins += 1
+            outcome = "😈 컴퓨터가 이겼습니다..."
         else:
-            st.session_state.draw_count += 1
+            outcome = "😐 무승부입니다."
 
-with col2:
-    if st.button("✊ 바위"):
-        user_choice = "바위"
-        computer_choice = random.choice(choices)
-        result = get_result(user_choice, computer_choice)
-        st.session_state.last_result = (user_choice, computer_choice, result)
-        if result == "승리":
-            st.session_state.user_score += 1
-        elif result == "패배":
-            st.session_state.computer_score += 1
-        else:
-            st.session_state.draw_count += 1
+        # 로그 기록
+        st.session_state.battle_log.append(
+            f"Round {st.session_state.round}: 당신 {emoji[user_choice]} vs 컴퓨터 {emoji[computer_choice]} → {outcome}"
+        )
 
-with col3:
-    if st.button("✋ 보"):
-        user_choice = "보"
-        computer_choice = random.choice(choices)
-        result = get_result(user_choice, computer_choice)
-        st.session_state.last_result = (user_choice, computer_choice, result)
-        if result == "승리":
-            st.session_state.user_score += 1
-        elif result == "패배":
-            st.session_state.computer_score += 1
-        else:
-            st.session_state.draw_count += 1
+        # 게임 종료 판정
+        if st.session_state.user_wins == 3:
+            st.session_state.game_over = True
+            st.success("🎊 당신이 승리했습니다! 인간은 아직 끝나지 않았습니다.")
+        elif st.session_state.computer_wins == 3:
+            st.session_state.game_over = True
+            st.error("💀 컴퓨터가 승리했습니다... 당신은 죽었습니다.")
 
-# ----------------- 결과 출력 -----------------
-if st.session_state.last_result:
-    user, computer, result = st.session_state.last_result
-    st.markdown("### 🧾 결과")
-    st.markdown(f"당신: {emoji[user]} **{user}**")
-    st.markdown(f"컴퓨터: {emoji[computer]} **{computer}**")
-    if result == "승리":
-        st.success("🎉 당신이 이겼습니다!")
-    elif result == "패배":
-        st.error("😥 컴퓨터에게 졌어요...")
-    else:
-        st.info("😐 무승부입니다.")
-
-# ----------------- 점수판 -----------------
+# ----------------- 로그 출력 -----------------
 st.markdown("---")
-st.markdown("### 📊 현재 점수")
-st.markdown(f"👤 당신: {st.session_state.user_score}승")
-st.markdown(f"💻 컴퓨터: {st.session_state.computer_score}승")
-st.markdown(f"⚖️ 무승부: {st.session_state.draw_count}회")
+st.markdown("### 📝 전투 기록")
+for log in reversed(st.session_state.battle_log):
+    st.markdown(f"- {log}")
 
-# ----------------- 초기화 버튼 -----------------
-if st.button("🔄 점수 초기화"):
-    st.session_state.user_score = 0
-    st.session_state.computer_score = 0
-    st.session_state.draw_count = 0
-    st.session_state.last_result = ""
+# ----------------- 현재 스코어 -----------------
+if not st.session_state.game_over:
+    st.markdown("---")
+    st.markdown(f"👤 당신의 승수: **{st.session_state.user_wins}**")
+    st.markdown(f"💻 컴퓨터의 승수: **{st.session_state.computer_wins}**")
+
+# ----------------- 게임 종료 후 -----------------
+else:
+    if st.button("🔄 다시 시작하기"):
+        st.session_state.user_wins = 0
+        st.session_state.computer_wins = 0
+        st.session_state.round = 0
+        st.session_state.game_over = False
+        st.session_state.battle_log = []
