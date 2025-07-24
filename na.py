@@ -91,19 +91,33 @@ if st.session_state.is_married and st.session_state.honeymoon_level < 3:
 
 # ---------------- 캐릭터 출력 ----------------
 with st.form("chu_click_form"):
+    # 추 버튼
     chu_emoji = "🦍" if st.session_state.is_mega_chu else "🐷"
     chu_button = f"<button type='submit' style='all: unset; cursor: pointer;'>{chu_emoji}</button>"
 
+    # 하트
     heart = ""
     if st.session_state.is_married:
         level = min(st.session_state.honeymoon_level, 3)
         heart = f"<span style='font-size:{40 + level * 10}px'>{heart_stages[level]}</span>"
 
-    jeon = "<span style='font-size:80px'>🧑</span>" if st.session_state.has_jeon else ""
+    # 전 꾸며서 출력
+    jeon = """
+    <span style='
+        font-size: 80px;
+        display: inline-block;
+        cursor: default;
+        padding: 0 10px;
+        transform: translateY(5px);
+    '>🧑</span>
+    """ if st.session_state.has_jeon else ""
+
+    # 박
     park = "<span style='font-size:40px'>👶 박</span>" if st.session_state.is_married else ""
 
+    # 출력
     st.markdown(f"""
-        <div style='display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: 20px; font-size: 80px;'>
+        <div style='display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: 20px;'>
             {chu_button}
             {heart}
             {jeon}
@@ -111,11 +125,13 @@ with st.form("chu_click_form"):
         </div>
     """, unsafe_allow_html=True)
 
+    # 클릭 처리
     clicked = st.form_submit_button()
     if clicked:
         gain = random.randint(100, 500)
         st.session_state.money += gain
 
+        # 대사
         if st.session_state.is_married:
             st.session_state.last_quote = f"💖 <i>{random.choice(love_quotes)}</i>"
         elif st.session_state.is_mega_chu:
@@ -123,6 +139,7 @@ with st.form("chu_click_form"):
         else:
             st.session_state.last_quote = f"🐽 <i>{random.choice(beg_quotes)}</i>"
 
+        # 전 수익 추가
         if st.session_state.has_jeon:
             st.session_state.money += gain // 2
 
