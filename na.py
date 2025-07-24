@@ -1,7 +1,7 @@
 import streamlit as st
 import random
 
-# --- 상태 초기화 ---
+# ---------------- 상태 초기화 ----------------
 if "money" not in st.session_state:
     st.session_state.money = 0
 if "last_quote" not in st.session_state:
@@ -13,9 +13,9 @@ if "is_mega_chu" not in st.session_state:
 if "is_married" not in st.session_state:
     st.session_state.is_married = False
 if "honeymoon_level" not in st.session_state:
-    st.session_state.honeymoon_level = 0  # 가족여행 최대 3회
+    st.session_state.honeymoon_level = 0  # 0~3
 
-# --- 대사 목록 ---
+# ---------------- 대사 목록 ----------------
 beg_quotes = [
     "형... 천 원만...", "밥 한 끼만 사주라...", "나는 왜 이러고 살까...",
     "치킨 시켜줘...", "배고파... 츄릅...", "그냥 눌러만 줘...",
@@ -34,21 +34,23 @@ love_quotes = [
 
 heart_stages = ["❤️", "💖", "💘", "💗"]
 
-# --- 페이지 설정 및 상단 금액 표시 ---
+# ---------------- 페이지 설정 ----------------
 st.set_page_config(page_title="추 키우기", page_icon="🐷", layout="centered")
+
+# 💰 돈 좌측 상단에 표시
 st.markdown(f"""
     <div style='position: absolute; top: 10px; left: 15px; font-size: 16px; color: gray;'>
         💰 {st.session_state.money:,}원
     </div>
 """, unsafe_allow_html=True)
 
-# --- 타이틀 줄이기 ---
+# ---------------- 타이틀 ----------------
 st.markdown("""
     <h2 style='text-align: center; color: #ff69b4;'>💸 추 키우기</h2>
-    <p style='text-align: center; font-size: 14px; color: gray; margin-bottom: 5px;'>한 푼 두 푼 모아 부자 추 만들기</p>
+    <p style='text-align: center; font-size: 14px; color: gray;'>한 푼 두 푼 모아 부자 추 만들기</p>
 """, unsafe_allow_html=True)
 
-# --- 상점 영역 ---
+# ---------------- 상점 ----------------
 with st.expander("🛍️ 상점", expanded=False):
     if not st.session_state.has_jeon:
         if st.button("💸 15,000원 - 전 같이 키우기"):
@@ -77,7 +79,7 @@ with st.expander("🛍️ 상점", expanded=False):
             else:
                 st.warning("💰 돈이 부족해요!")
 
-# --- 가족여행 버튼 ---
+# ---------------- 가족여행 ----------------
 if st.session_state.is_married and st.session_state.honeymoon_level < 3:
     if st.button(f"🏖 가족여행 ({st.session_state.honeymoon_level}/3) - 25,000원"):
         if st.session_state.money >= 25000:
@@ -87,33 +89,31 @@ if st.session_state.is_married and st.session_state.honeymoon_level < 3:
         else:
             st.warning("💰 가족여행 비용 부족!")
 
-# --- 캐릭터 가로 정렬 영역 ---
+# ---------------- 캐릭터 출력 ----------------
 with st.form("chu_click_form"):
-    chu = "🦍" if st.session_state.is_mega_chu else "🐷"
-    jeon = "🧑" if st.session_state.has_jeon else ""
+    chu_emoji = "🦍" if st.session_state.is_mega_chu else "🐷"
     heart = ""
-    park = ""
-
     if st.session_state.is_married:
         level = min(st.session_state.honeymoon_level, 3)
         heart = f"<span style='font-size:{40 + level * 10}px'>{heart_stages[level]}</span>"
-        park = "<span style='font-size:40px'>👶 박</span>"
+    jeon = "🧑" if st.session_state.has_jeon else ""
+    park = "<span style='font-size:40px'>👶 박</span>" if st.session_state.is_married else ""
 
+    # 이모지 가로 정렬
     st.markdown(f"""
         <div style='display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: 20px; font-size: 80px;'>
-            <button type="submit" style="all: unset; cursor: pointer;">{chu}</button>
+            <button type="submit" style="all: unset; cursor: pointer;">{chu_emoji}</button>
             {heart}
-            {jeon and f"<button type='submit' style='all: unset; cursor: pointer;'>{jeon}</button>"}
+            <span>{jeon}</span>
             {park}
         </div>
     """, unsafe_allow_html=True)
 
-    submitted = st.form_submit_button()
-    if submitted:
+    clicked = st.form_submit_button()
+    if clicked:
         gain = random.randint(100, 500)
         st.session_state.money += gain
 
-        # 대사 로직
         if st.session_state.is_married:
             st.session_state.last_quote = f"💖 <i>{random.choice(love_quotes)}</i>"
         elif st.session_state.is_mega_chu:
@@ -121,15 +121,13 @@ with st.form("chu_click_form"):
         else:
             st.session_state.last_quote = f"🐽 <i>{random.choice(beg_quotes)}</i>"
 
-        # 전 수익
         if st.session_state.has_jeon:
             st.session_state.money += gain // 2
 
-# --- 말풍선 출력 (아래) ---
+# ---------------- 말풍선 ----------------
 st.markdown(f"""
     <div style='display: flex; justify-content: center; margin-top: 10px;'>
         <div style="
-            position: relative;
             background: #fefefe;
             border-radius: 10px;
             padding: 10px 16px;
@@ -139,17 +137,6 @@ st.markdown(f"""
             max-width: 260px;
             text-align: center;">
             💬 {st.session_state.last_quote}
-            <div style="
-                content: '';
-                position: absolute;
-                top: -14px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 0;
-                height: 0;
-                border: 8px solid transparent;
-                border-bottom-color: #ccc;">
-            </div>
         </div>
     </div>
 """, unsafe_allow_html=True)
