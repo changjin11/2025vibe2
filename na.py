@@ -1,7 +1,7 @@
 import streamlit as st
 import random
 
-# --- 초기 상태 설정 ---
+# --- 상태 초기화 ---
 if "money" not in st.session_state:
     st.session_state.money = 0
 if "last_quote" not in st.session_state:
@@ -10,6 +10,8 @@ if "has_jeon" not in st.session_state:
     st.session_state.has_jeon = False
 if "is_mega_chu" not in st.session_state:
     st.session_state.is_mega_chu = False
+if "is_married" not in st.session_state:
+    st.session_state.is_married = False
 
 # --- 대사 목록 ---
 beg_quotes = [
@@ -31,7 +33,15 @@ scolding_quotes = [
     "전, 나 실망이다..."
 ]
 
-# --- 타이틀 및 설정 ---
+love_quotes = [
+    "전... 넌 내 전부야 ❤️",
+    "전, 같이 있어서 행복해.",
+    "우리 박이를 위해 더 열심히 벌자!",
+    "내가 널 얼마나 좋아하는지 알아?",
+    "사랑해, 전."
+]
+
+# --- 타이틀 ---
 st.set_page_config(page_title="추 키우기", page_icon="🐷", layout="centered")
 st.markdown("""
     <h1 style='text-align: center; font-size: 48px; color: #ff69b4;'>💸 추 키우기 💸</h1>
@@ -42,8 +52,6 @@ st.markdown("""
 # --- 상점 UI ---
 with st.expander("🛍️ 상점"):
     st.markdown("### 🧑 전 같이 키우기")
-    st.markdown("- 추를 도와 돈을 벌어주는 동료입니다.")
-    st.markdown("- 추 클릭 시 전이 절반 수익을 더 벌어줍니다.")
     if not st.session_state.has_jeon:
         if st.button("💸 5,000원으로 전 영입하기"):
             if st.session_state.money >= 5000:
@@ -54,10 +62,7 @@ with st.expander("🛍️ 상점"):
                 st.warning("💰 돈이 부족해요!")
 
     if st.session_state.has_jeon:
-        st.markdown("---")
         st.markdown("### 🦍 추 진화 시키기")
-        st.markdown("- 추가 메가 추로 진화합니다.")
-        st.markdown("- 더 이상 구걸하지 않고 전을 구박합니다.")
         if not st.session_state.is_mega_chu:
             if st.button("✨ 10,000원으로 메가 추 진화"):
                 if st.session_state.money >= 10000:
@@ -67,39 +72,56 @@ with st.expander("🛍️ 상점"):
                 else:
                     st.warning("💰 돈이 부족해요!")
 
+    if st.session_state.has_jeon and st.session_state.is_mega_chu:
+        st.markdown("### 💍 추&전 결혼 시키기")
+        if not st.session_state.is_married:
+            if st.button("💖 20,000원으로 결혼하기"):
+                if st.session_state.money >= 20000:
+                    st.session_state.money -= 20000
+                    st.session_state.is_married = True
+                    st.success("💍 추와 전이 결혼했습니다!")
+                else:
+                    st.warning("💰 돈이 부족해요!")
+
 # --- 캐릭터 클릭 영역 ---
 with st.form("chu_click_form"):
     st.markdown("""
-        <div style='display: flex; justify-content: center; align-items: center; margin-top: 40px; gap: 50px;'>
+        <div style='display: flex; justify-content: center; align-items: center; margin-top: 40px; gap: 20px;'>
     """, unsafe_allow_html=True)
 
-    col1, col2 = st.columns([1, 1], gap="small")
+    # 추
+    chu_emoji = "🦍" if st.session_state.is_mega_chu else "🐷"
+    st.markdown(f"""
+        <button type="submit"
+            style="
+                all: unset;
+                font-size: 100px;
+                line-height: 1;
+                cursor: pointer;">
+            {chu_emoji}
+        </button>
+    """, unsafe_allow_html=True)
 
-    with col1:
-        emoji = "🦍" if st.session_state.is_mega_chu else "🐷"
-        st.markdown(f"""
-            <button type="submit"
+    # 하트
+    if st.session_state.is_married:
+        st.markdown("<div style='font-size: 40px;'>❤️</div>", unsafe_allow_html=True)
+
+    # 전
+    if st.session_state.has_jeon:
+        st.markdown("""
+            <button name="jeon_click" type="submit"
                 style="
                     all: unset;
                     font-size: 100px;
                     line-height: 1;
                     cursor: pointer;">
-                {emoji}
+                🧑
             </button>
         """, unsafe_allow_html=True)
 
-    if st.session_state.has_jeon:
-        with col2:
-            st.markdown("""
-                <button name="jeon_click" type="submit"
-                    style="
-                        all: unset;
-                        font-size: 100px;
-                        line-height: 1;
-                        cursor: pointer;">
-                    🧑
-                </button>
-            """, unsafe_allow_html=True)
+    # 박
+    if st.session_state.is_married:
+        st.markdown("<div style='font-size: 40px;'>👶 박</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -108,16 +130,18 @@ with st.form("chu_click_form"):
     if submitted:
         gain = random.randint(100, 500)
         st.session_state.money += gain
-        if st.session_state.is_mega_chu:
+
+        if st.session_state.is_married:
+            st.session_state.last_quote = f"💖 <i>{random.choice(love_quotes)}</i>"
+        elif st.session_state.is_mega_chu:
             st.session_state.last_quote = f"🦍 <i>{random.choice(scolding_quotes)}</i>"
         else:
             st.session_state.last_quote = f"🐽 <i>{random.choice(beg_quotes)}</i>"
 
-        # 전 수익
         if st.session_state.has_jeon:
             st.session_state.money += gain // 2
 
-# --- 말풍선 출력 ---
+# --- 말풍선 ---
 st.markdown(f"""
     <div style='display: flex; justify-content: center; margin-top: 20px;'>
         <div style="
