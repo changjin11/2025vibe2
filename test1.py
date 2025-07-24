@@ -44,7 +44,7 @@ def play_sound_from_url(url):
     except:
         st.warning("🎵 사운드 재생 실패!")
 
-# ----------------- 버튼 클릭 처리 -----------------
+# ----------------- 버튼 처리 -----------------
 col1, col2 = st.columns(2)
 
 with col1:
@@ -54,14 +54,14 @@ with col1:
             st.session_state.death_count += 1
             st.session_state.last_will = random.choice(wills)
             st.session_state.play_sound = True
-            st.experimental_rerun()
+            st.rerun()
 
 with col2:
     if st.button("❤️ 추 살리기"):
         if st.session_state.is_dead:
             st.session_state.is_dead = False
             st.session_state.last_will = ""
-            st.experimental_rerun()
+            st.rerun()
 
 # ----------------- 화면 출력 -----------------
 if st.session_state.is_dead:
