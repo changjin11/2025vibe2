@@ -91,17 +91,17 @@ if st.session_state.is_married and st.session_state.honeymoon_level < 3:
 
 # ---------------- 캐릭터 출력 ----------------
 with st.form("chu_click_form"):
-    # 추 버튼
+    # 추 버튼 크게
     chu_emoji = "🦍" if st.session_state.is_mega_chu else "🐷"
-    chu_button = f"<button type='submit' style='all: unset; cursor: pointer;'>{chu_emoji}</button>"
+    chu_button = f"<button type='submit' style='all: unset; cursor: pointer; font-size: 110px;'>{chu_emoji}</button>"
 
-    # 하트
+    # 하트 크기 증가
     heart = ""
     if st.session_state.is_married:
         level = min(st.session_state.honeymoon_level, 3)
         heart = f"<span style='font-size:{40 + level * 10}px'>{heart_stages[level]}</span>"
 
-    # 전 꾸며서 출력
+    # 전 캐릭터
     jeon = """
     <span style='
         font-size: 80px;
@@ -112,7 +112,7 @@ with st.form("chu_click_form"):
     '>🧑</span>
     """ if st.session_state.has_jeon else ""
 
-    # 박
+    # 박 캐릭터
     park = "<span style='font-size:40px'>👶 박</span>" if st.session_state.is_married else ""
 
     # 출력
@@ -139,7 +139,7 @@ with st.form("chu_click_form"):
         else:
             st.session_state.last_quote = f"🐽 <i>{random.choice(beg_quotes)}</i>"
 
-        # 전 수익 추가
+        # 전 수익 보너스
         if st.session_state.has_jeon:
             st.session_state.money += gain // 2
 
