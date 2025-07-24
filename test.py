@@ -1,3 +1,3 @@
 import streamlit as st
-st.title('ㅏㅏㅏㅏㅏ')
+st.title('추추추')
 st.write('ㅇㅇㅇㅇㅇㅇ')
