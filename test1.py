@@ -3,7 +3,7 @@ import random
 import base64
 import requests
 
-# ----------------- 페이지 설정 -----------------
+# ----------------- 설정 -----------------
 st.set_page_config(page_title="죽은 추를 클릭하세요", layout="centered")
 st.title("🐹 추를 클릭해보세요...")
 
@@ -17,7 +17,11 @@ if 'last_will' not in st.session_state:
 if 'play_sound' not in st.session_state:
     st.session_state.play_sound = False
 
-# ----------------- 유언 리스트 -----------------
+# ----------------- 리소스 -----------------
+alive_image_url = "https://raw.githubusercontent.com/gkswjdzz/imagecdn/main/chu_alive.png"
+dead_image_url = "https://raw.githubusercontent.com/gkswjdzz/imagecdn/main/chu_dead.png"
+sound_url = "https://github.com/gkswjdzz/imagecdn/raw/main/death_sound.mp3"
+
 wills = [
     "내 최후의 말... 치즈는 냉장고 제일 아래칸에...",
     "난 사실 햄스터가 아니었어...",
@@ -25,11 +29,6 @@ wills = [
     "누가 나 좀 살려줘...",
     "이럴 줄 알았으면 더 많이 놀걸...",
 ]
-
-# ----------------- 이미지 및 사운드 URL -----------------
-alive_image_url = "https://raw.githubusercontent.com/gkswjdzz/imagecdn/main/chu_alive.png"
-dead_image_url = "https://raw.githubusercontent.com/gkswjdzz/imagecdn/main/chu_dead.png"
-sound_url = "https://github.com/gkswjdzz/imagecdn/raw/main/death_sound.mp3"
 
 # ----------------- 사운드 재생 함수 -----------------
 def play_sound_from_url(url):
@@ -43,19 +42,28 @@ def play_sound_from_url(url):
         """
         st.markdown(md, unsafe_allow_html=True)
     except:
-        st.warning("🎵 사운드 로딩에 실패했습니다.")
+        st.warning("🎵 사운드 재생 실패!")
 
 # ----------------- 버튼 클릭 처리 -----------------
-if st.button("💀 추를 죽이고 살리기"):
-    st.session_state.is_dead = not st.session_state.is_dead
-    if st.session_state.is_dead:
-        st.session_state.death_count += 1
-        st.session_state.last_will = random.choice(wills)
-        st.session_state.play_sound = True
-    else:
-        st.session_state.last_will = ""
+col1, col2 = st.columns(2)
 
-# ----------------- UI 출력 -----------------
+with col1:
+    if st.button("💀 추 죽이기"):
+        if not st.session_state.is_dead:
+            st.session_state.is_dead = True
+            st.session_state.death_count += 1
+            st.session_state.last_will = random.choice(wills)
+            st.session_state.play_sound = True
+            st.experimental_rerun()
+
+with col2:
+    if st.button("❤️ 추 살리기"):
+        if st.session_state.is_dead:
+            st.session_state.is_dead = False
+            st.session_state.last_will = ""
+            st.experimental_rerun()
+
+# ----------------- 화면 출력 -----------------
 if st.session_state.is_dead:
     st.image(dead_image_url, caption="💀 추는 죽었습니다...", use_container_width=True)
     st.markdown(f"📝 **유언:** _{st.session_state.last_will}_")
@@ -63,7 +71,7 @@ if st.session_state.is_dead:
 else:
     st.image(alive_image_url, caption="😊 추는 아직 살아있어요", use_container_width=True)
 
-# ----------------- 사운드 재생 -----------------
+# ----------------- 사운드 출력 -----------------
 if st.session_state.play_sound:
     play_sound_from_url(sound_url)
     st.session_state.play_sound = False
