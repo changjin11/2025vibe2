@@ -12,6 +12,8 @@ if "is_mega_chu" not in st.session_state:
     st.session_state.is_mega_chu = False
 if "is_married" not in st.session_state:
     st.session_state.is_married = False
+if "honeymoon_level" not in st.session_state:
+    st.session_state.honeymoon_level = 0  # 최대 3
 
 # --- 대사 목록 ---
 beg_quotes = [
@@ -41,6 +43,8 @@ love_quotes = [
     "사랑해, 전."
 ]
 
+heart_stages = ["❤️", "💖", "💘", "💗"]
+
 # --- 타이틀 ---
 st.set_page_config(page_title="추 키우기", page_icon="🐷", layout="centered")
 st.markdown("""
@@ -49,13 +53,13 @@ st.markdown("""
     <hr>
 """, unsafe_allow_html=True)
 
-# --- 상점 UI ---
+# --- 상점 ---
 with st.expander("🛍️ 상점"):
     st.markdown("### 🧑 전 같이 키우기")
     if not st.session_state.has_jeon:
-        if st.button("💸 5,000원으로 전 영입하기"):
-            if st.session_state.money >= 5000:
-                st.session_state.money -= 5000
+        if st.button("💸 15,000원으로 전 영입하기"):
+            if st.session_state.money >= 15000:
+                st.session_state.money -= 15000
                 st.session_state.has_jeon = True
                 st.success("🧑 전을 영입했습니다!")
             else:
@@ -64,9 +68,9 @@ with st.expander("🛍️ 상점"):
     if st.session_state.has_jeon:
         st.markdown("### 🦍 추 진화 시키기")
         if not st.session_state.is_mega_chu:
-            if st.button("✨ 10,000원으로 메가 추 진화"):
-                if st.session_state.money >= 10000:
-                    st.session_state.money -= 10000
+            if st.button("✨ 30,000원으로 메가 추 진화"):
+                if st.session_state.money >= 30000:
+                    st.session_state.money -= 30000
                     st.session_state.is_mega_chu = True
                     st.success("🦍 메가 추로 진화했습니다!")
                 else:
@@ -75,21 +79,31 @@ with st.expander("🛍️ 상점"):
     if st.session_state.has_jeon and st.session_state.is_mega_chu:
         st.markdown("### 💍 추&전 결혼 시키기")
         if not st.session_state.is_married:
-            if st.button("💖 20,000원으로 결혼하기"):
-                if st.session_state.money >= 20000:
-                    st.session_state.money -= 20000
+            if st.button("💖 60,000원으로 결혼하기"):
+                if st.session_state.money >= 60000:
+                    st.session_state.money -= 60000
                     st.session_state.is_married = True
                     st.success("💍 추와 전이 결혼했습니다!")
                 else:
                     st.warning("💰 돈이 부족해요!")
 
-# --- 캐릭터 클릭 영역 ---
+# --- 가족여행 버튼 ---
+if st.session_state.is_married and st.session_state.honeymoon_level < 3:
+    if st.button(f"🏖 가족여행 떠나기 ({st.session_state.honeymoon_level}/3회) - 비용: 25,000원"):
+        if st.session_state.money >= 25000:
+            st.session_state.money -= 25000
+            st.session_state.honeymoon_level += 1
+            st.success("가족여행을 다녀왔습니다! ❤️ 하트가 커졌어요!")
+        else:
+            st.warning("💰 가족여행 비용이 부족해요!")
+
+# --- 캐릭터 영역 ---
 with st.form("chu_click_form"):
     st.markdown("""
         <div style='display: flex; justify-content: center; align-items: center; margin-top: 40px; gap: 20px;'>
     """, unsafe_allow_html=True)
 
-    # 추
+    # 추 캐릭터
     chu_emoji = "🦍" if st.session_state.is_mega_chu else "🐷"
     st.markdown(f"""
         <button type="submit"
@@ -104,7 +118,8 @@ with st.form("chu_click_form"):
 
     # 하트
     if st.session_state.is_married:
-        st.markdown("<div style='font-size: 40px;'>❤️</div>", unsafe_allow_html=True)
+        heart = heart_stages[min(st.session_state.honeymoon_level, 3)]
+        st.markdown(f"<div style='font-size: {40 + st.session_state.honeymoon_level * 10}px;'>{heart}</div>", unsafe_allow_html=True)
 
     # 전
     if st.session_state.has_jeon:
@@ -119,7 +134,7 @@ with st.form("chu_click_form"):
             </button>
         """, unsafe_allow_html=True)
 
-    # 박
+    # 박 (자녀)
     if st.session_state.is_married:
         st.markdown("<div style='font-size: 40px;'>👶 박</div>", unsafe_allow_html=True)
 
@@ -131,6 +146,7 @@ with st.form("chu_click_form"):
         gain = random.randint(100, 500)
         st.session_state.money += gain
 
+        # 대사
         if st.session_state.is_married:
             st.session_state.last_quote = f"💖 <i>{random.choice(love_quotes)}</i>"
         elif st.session_state.is_mega_chu:
