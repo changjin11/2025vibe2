@@ -1,12 +1,13 @@
 import streamlit as st
 import random
 
-# ---- 상태 초기화 ----
+# 초기 상태 설정
 if "money" not in st.session_state:
     st.session_state.money = 0
 if "last_quote" not in st.session_state:
     st.session_state.last_quote = "🐽 <i>나를 눌러줘...</i>"
 
+# 구걸 대사 목록
 quotes = [
     "형... 천 원만...",
     "밥 한 끼만 사주라...",
@@ -18,7 +19,7 @@ quotes = [
     "형 나 진짜 오늘은... ㅠㅠ"
 ]
 
-# ---- 타이틀 ----
+# 페이지 타이틀 및 설명
 st.set_page_config(page_title="추 키우기", page_icon="🐽", layout="centered")
 st.markdown("""
     <h1 style='text-align: center; font-size: 48px; color: #ff69b4;'>💸 추 키우기 💸</h1>
@@ -26,7 +27,7 @@ st.markdown("""
     <hr>
 """, unsafe_allow_html=True)
 
-# ---- 캐릭터 + 말풍선 ----
+# 캐릭터 + 말풍선 섹션
 with st.form("chu_click_form"):
     st.markdown(f"""
         <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 40px; margin-right: 10%;">
@@ -58,7 +59,7 @@ with st.form("chu_click_form"):
                 </div>
             </div>
 
-            <!-- 추 이모지 버튼 -->
+            <!-- 추 캐릭터 이모지 버튼 -->
             <button type="submit"
                 style="
                     all: unset;
@@ -70,12 +71,13 @@ with st.form("chu_click_form"):
         </div>
     """, unsafe_allow_html=True)
 
+    # 클릭 이벤트 처리
     submitted = st.form_submit_button()
     if submitted:
         st.session_state.money += random.randint(100, 500)
         st.session_state.last_quote = f"<i>{random.choice(quotes)}</i>"
 
-# ---- 돈 표시 ----
+# 보유 금액 표시
 st.markdown("<hr>", unsafe_allow_html=True)
 st.markdown(f"""
     <h3 style='text-align: center; font-size: 24px;'>
