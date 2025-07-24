@@ -1,68 +1,52 @@
 import streamlit as st
 import random
-import time
-from streamlit_autorefresh import st_autorefresh
 
-# 자동 새로고침 (1초마다)
-st_autorefresh(interval=1000, key="auto_refresh")
+# 1. 페이지 설정
+st.set_page_config(page_title="추 키우기", page_icon="🐾", layout="centered")
 
-# 게임 설정
-TIME_LIMIT = 30
-FISH_LIFESPAN = 1.5
+# 2. 상태 초기화
+if "money" not in st.session_state:
+    st.session_state.money = 0
+if "last_quote" not in st.session_state:
+    st.session_state.last_quote = "나를 눌러줘..."
 
-# 상태 초기화
-if "score" not in st.session_state:
-    st.session_state.score = 0
-if "fish_pos" not in st.session_state:
-    st.session_state.fish_pos = (random.randint(0, 4), random.randint(0, 4))
-if "fish_spawn_time" not in st.session_state:
-    st.session_state.fish_spawn_time = time.time()
-if "start_time" not in st.session_state:
-    st.session_state.start_time = time.time()
-if "game_over" not in st.session_state:
-    st.session_state.game_over = False
+# 3. 대사 리스트
+quotes = [
+    "형... 천 원만...",
+    "밥 한 끼만 사주라...",
+    "나는 왜 이러고 살까...",
+    "치킨 시켜줘...",
+    "배고파... 츄릅...",
+    "그냥 눌러만 줘...",
+    "현질 좀... 그거 안 되겠니?",
+    "형 나 진짜 오늘은... ㅠㅠ"
+]
 
-# 시간 확인
-now = time.time()
-elapsed = int(now - st.session_state.start_time)
-remaining = TIME_LIMIT - elapsed
+# 4. 타이틀 꾸미기
+st.markdown("""
+    <h1 style='text-align: center; font-size: 48px; color: #ff69b4;'>💸 추 키우기 💸</h1>
+    <p style='text-align: center; font-size: 18px; color: gray;'>한 푼 두 푼 모아 부자 추 만들기</p>
+""", unsafe_allow_html=True)
 
-# 게임 종료 처리
-if remaining <= 0:
-    st.session_state.game_over = True
+st.markdown("---")
 
-# 물고기 시간 초과 시 재배치
-if not st.session_state.game_over and now - st.session_state.fish_spawn_time > FISH_LIFESPAN:
-    st.session_state.fish_pos = (random.randint(0, 4), random.randint(0, 4))
-    st.session_state.fish_spawn_time = now
+# 5. 중앙 캐릭터 영역
+st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
 
-# 게임 UI
-st.title("🎣 낚시 클릭 게임")
-st.write(f"⏱ 남은 시간: {max(0, remaining)}초")
-st.write(f"🎯 점수: {st.session_state.score}")
+if st.button("🐷 추 (클릭해서 구걸하기)", key="chu_click", help="눌러서 추에게 돈을 주세요"):
+    st.session_state.money += random.randint(100, 500)  # 랜덤 수입
+    st.session_state.last_quote = random.choice(quotes)
 
-cols = st.columns(5)
-clicked = False
+# 말풍선 출력
+st.markdown(f"""
+    <div style='margin-top: 20px; background-color: #f0f0f0; border-radius: 12px;
+                padding: 15px; display: inline-block; font-size: 20px;'>
+        💬 <i>{st.session_state.last_quote}</i>
+    </div>
+""", unsafe_allow_html=True)
 
-# 물고기 출력 및 클릭 처리
-for i in range(5):
-    with cols[i]:
-        for j in range(5):
-            if (i, j) == st.session_state.fish_pos and not st.session_state.game_over:
-                if st.button("🐟", key=f"fish_{i}_{j}_{elapsed}"):
-                    st.session_state.score += 1
-                    st.session_state.fish_pos = (random.randint(0, 4), random.randint(0, 4))
-                    st.session_state.fish_spawn_time = time.time()
-                    clicked = True
-            else:
-                st.write(" ")  # 빈 공간 채우기
+st.markdown("</div>", unsafe_allow_html=True)
 
-# 게임 종료 UI
-if st.session_state.game_over:
-    st.success(f"게임 종료! 🎉 최종 점수: {st.session_state.score}점")
-    if st.button("🔄 다시 시작"):
-        st.session_state.score = 0
-        st.session_state.start_time = time.time()
-        st.session_state.fish_spawn_time = time.time()
-        st.session_state.fish_pos = (random.randint(0, 4), random.randint(0, 4))
-        st.session_state.game_over = False
+# 6. 돈 표시
+st.markdown("---")
+st.markdown(f"<h3 style='text-align: center;'>💰 보유 금액: {st.session_state.money} 원</h3>", unsafe_allow_html=True)
