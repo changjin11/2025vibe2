@@ -92,19 +92,21 @@ if st.session_state.is_married and st.session_state.honeymoon_level < 3:
 # ---------------- 캐릭터 출력 ----------------
 with st.form("chu_click_form"):
     chu_emoji = "🦍" if st.session_state.is_mega_chu else "🐷"
+    chu_button = f"<button type='submit' style='all: unset; cursor: pointer;'>{chu_emoji}</button>"
+
     heart = ""
     if st.session_state.is_married:
         level = min(st.session_state.honeymoon_level, 3)
         heart = f"<span style='font-size:{40 + level * 10}px'>{heart_stages[level]}</span>"
-    jeon = "🧑" if st.session_state.has_jeon else ""
+
+    jeon = "<span style='font-size:80px'>🧑</span>" if st.session_state.has_jeon else ""
     park = "<span style='font-size:40px'>👶 박</span>" if st.session_state.is_married else ""
 
-    # 이모지 가로 정렬
     st.markdown(f"""
         <div style='display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: 20px; font-size: 80px;'>
-            <button type="submit" style="all: unset; cursor: pointer;">{chu_emoji}</button>
+            {chu_button}
             {heart}
-            <span>{jeon}</span>
+            {jeon}
             {park}
         </div>
     """, unsafe_allow_html=True)
