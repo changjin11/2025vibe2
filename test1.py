@@ -15,7 +15,7 @@ if 'death_count' not in st.session_state:
 if 'last_will' not in st.session_state:
     st.session_state.last_will = ""
 if 'play_sound' not in st.session_state:
-    st.session_state.play_sound = False  # 사운드 재생 여부
+    st.session_state.play_sound = False
 
 # ----------------- 유언 리스트 -----------------
 wills = [
@@ -31,7 +31,7 @@ alive_image_url = "https://raw.githubusercontent.com/gkswjdzz/imagecdn/main/chu_
 dead_image_url = "https://raw.githubusercontent.com/gkswjdzz/imagecdn/main/chu_dead.png"
 sound_url = "https://github.com/gkswjdzz/imagecdn/raw/main/death_sound.mp3"
 
-# ----------------- 사운드 재생 함수 (URL) -----------------
+# ----------------- 사운드 재생 함수 -----------------
 def play_sound_from_url(url):
     try:
         response = requests.get(url)
@@ -45,29 +45,25 @@ def play_sound_from_url(url):
     except:
         st.warning("🎵 사운드 로딩에 실패했습니다.")
 
-# ----------------- 메인 로직 -----------------
+# ----------------- 버튼 클릭 처리 -----------------
+if st.button("💀 추를 죽이고 살리기"):
+    st.session_state.is_dead = not st.session_state.is_dead
+    if st.session_state.is_dead:
+        st.session_state.death_count += 1
+        st.session_state.last_will = random.choice(wills)
+        st.session_state.play_sound = True
+    else:
+        st.session_state.last_will = ""
 
-# 😵 죽은 상태
+# ----------------- UI 출력 -----------------
 if st.session_state.is_dead:
     st.image(dead_image_url, caption="💀 추는 죽었습니다...", use_container_width=True)
     st.markdown(f"📝 **유언:** _{st.session_state.last_will}_")
     st.markdown(f"☠️ 총 죽인 횟수: `{st.session_state.death_count}`")
-
-    if st.button("🔄 다시 살리기"):
-        st.session_state.is_dead = False
-        st.session_state.last_will = ""
-
-# 😀 살아있는 상태
 else:
-    if st.button("🐹 추를 클릭해서 죽이기"):
-        st.session_state.is_dead = True
-        st.session_state.death_count += 1
-        st.session_state.last_will = random.choice(wills)
-        st.session_state.play_sound = True
-
     st.image(alive_image_url, caption="😊 추는 아직 살아있어요", use_container_width=True)
 
-# 🔊 사운드 재생 (클릭 후에만 실행)
+# ----------------- 사운드 재생 -----------------
 if st.session_state.play_sound:
     play_sound_from_url(sound_url)
     st.session_state.play_sound = False
